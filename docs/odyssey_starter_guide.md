@@ -1,5 +1,7 @@
 Follow the guide of [Installing locally from source](https://hyperledger.github.io/caliper/vNext/installing-caliper/#installing-locally-from-source)
 
+0.start odyssey.
+
 1.To install the basic dependencies of the repository.
 
 `user@ubuntu:~/caliper$ npm i && npm run repoclean -- --yes && npm run bootstrap`
