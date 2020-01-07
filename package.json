@@ -18,7 +18,9 @@
     "node": ">=8.10.0",
     "npm": ">=5.6.0"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@hyperledger/caliper-cli": "^0.2.0"
+  },
   "devDependencies": {
     "lerna": "^3.18.3",
     "license-check-and-add": "2.3.6"
