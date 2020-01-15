@@ -1,6 +1,6 @@
 {
     "caliper": {
-        "blockchain": "ethereum",
+        "blockchain": "odyssey",
         "command" : {}
     },
     "ethereum": {

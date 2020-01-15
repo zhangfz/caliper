@@ -27,7 +27,7 @@ class EthereumClientFactory {
      * @returns {Object} the child process
      */
     spawnWorker() {
-        const child = childProcess.fork(path.join(__dirname, './ethereumClientWorker.js'), process.argv.slice(2), { env: process.env});
+        const child = childProcess.fork(path.join(__dirname, './odysseyClientWorker.js'), process.argv.slice(2), { env: process.env});
 
         const msg = {
             type: 'init'

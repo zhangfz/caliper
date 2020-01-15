@@ -17,7 +17,7 @@
 const EthereumHDKey = require('ethereumjs-wallet/hdkey');
 const Web3 = require('web3');
 const {BlockchainInterface, CaliperUtils, TxStatus} = require('@hyperledger/caliper-core');
-const logger = CaliperUtils.getLogger('ethereum.js');
+const logger = CaliperUtils.getLogger('odyssey.js');
 
 /**
  * @typedef {Object} EthereumInvoke

@@ -18,8 +18,8 @@ Currently supported blockchain solutions:
 * [Hyperledger Sawtooth 1.0+](https://github.com/hyperledger/sawtooth-core)
 * [Hyperledger Iroha 1.0 beta-3](https://github.com/hyperledger/iroha)
 * [Hyperledger Burrow 1.0](https://github.com/hyperledger/burrow)
-* [Ethereum](https://github.com/ethereum/go-ethereum)
-* [Hyperledger Besu](https://github.com/hyperledger/besu), utilizing the Ethereum adapter.
+* [Odyssey](https://github.com/ethereum/go-ethereum)
+* [Hyperledger Besu](https://github.com/hyperledger/besu), utilizing the Odyssey adapter.
 * [FISCO BCOS](https://github.com/FISCO-BCOS/FISCO-BCOS)
 
 Currently supported performance indicators:

@@ -5,7 +5,7 @@
 * __BREAKING:__ Added rigorous and strict validation for Fabric network configuration files. Some attributes became mutually exclusive, which might break your previous configuration files that relied on precedence between attributes ([PR#595](https://github.com/hyperledger/caliper/pull/595)).
 * __BREAKING:__ Improved the logging configuration flexibility. The default log message structure has changed, which might break your dependent (e.g. log mining) applications ([PR#598](https://github.com/hyperledger/caliper/pull/595), [PR#607](https://github.com/hyperledger/caliper/pull/607)).
 * __BREAKING:__ Made report file path configurable. The default report path has changed, which might break your dependent applications ([PR#601](https://github.com/hyperledger/caliper/pull/601)).
-* Added support for Ethereum ([PR#432](https://github.com/hyperledger/caliper/pull/432))
+* Added support for Odyssey ([PR#432](https://github.com/hyperledger/caliper/pull/432))
 * Added support for Hyperledger Besu ([PR#616](https://github.com/hyperledger/caliper/pull/616))
 * Added support for FISCO BCOS ([PR#515](https://github.com/hyperledger/caliper/pull/515))
 * Added the `querySmartContract` function to the `Blockchain` interface ([PR#578](https://github.com/hyperledger/caliper/pull/578)). _The old `queryState` function will be deprecated and removed in the upcoming releases (once every adapter supports the new function)!_
