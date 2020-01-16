@@ -14,8 +14,9 @@
         "packages/caliper-iroha",
         "packages/caliper-sawtooth",
         "packages/caliper-cli",
-        "packages/caliper-tests-integration"
-	],
+        "packages/caliper-tests-integration",
+        "packages/caliper-odyssey"
+    ],
 	"version": "0.3.0-unstable",
 	"hoist": true
   }
