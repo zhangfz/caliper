@@ -38,11 +38,22 @@ class Odyssey extends BlockchainInterface {
      * @param {string} workspace_root The absolute path to the root location for the application configuration files.
      */
     constructor(config_path, workspace_root) {
+        console.log("constructor-------------------");
         super(config_path);
         this.bcType = 'ethereum';
         this.workspaceRoot = workspace_root;
         this.ethereumConfig = require(config_path).ethereum;
-        this.web3 = new Web3(this.ethereumConfig.url);
+
+        var web3Clients =[]
+        if (typeof (this.ethereumConfig.url) == 'object') {
+            this.ethereumConfig.url.forEach(function (myurl) {
+                web3Clients.push(new Web3(myurl))
+            })
+        } else {
+            web3Clients.push(new Web3(this.ethereumConfig.url))
+        }
+        // this.web3 = new Web3(this.ethereumConfig.url);
+        this.web3 = web3Clients;
         this.web3.transactionConfirmationBlocks = this.ethereumConfig.transactionConfirmationBlocks;
     }
 
@@ -51,10 +62,12 @@ class Odyssey extends BlockchainInterface {
      * @return {object} Promise<boolean> True if the account got unlocked successful otherwise false.
      */
     init() {
+        console.log("init-------------------")
+
         if (this.ethereumConfig.contractDeployerAddressPrivateKey) {
-            this.web3.eth.accounts.wallet.add(this.ethereumConfig.contractDeployerAddressPrivateKey);
+            this.web3[0].eth.accounts.wallet.add(this.ethereumConfig.contractDeployerAddressPrivateKey);
         } else if (this.ethereumConfig.contractDeployerAddressPassword) {
-            return this.web3.eth.personal.unlockAccount(this.ethereumConfig.contractDeployerAddress, this.ethereumConfig.contractDeployerAddressPassword, 1000);
+            return this.web3[0].eth.personal.unlockAccount(this.ethereumConfig.contractDeployerAddress, this.ethereumConfig.contractDeployerAddressPassword, 1000);
         }
     }
 
@@ -63,6 +76,7 @@ class Odyssey extends BlockchainInterface {
      * @return {object} Promise execution for all the contract creations.
      */
     async installSmartContract() {
+        console.log("installSmartContract-------------------")
         let promises = [];
         let self = this;
         logger.info('Creating contracts...');
@@ -71,7 +85,7 @@ class Odyssey extends BlockchainInterface {
             let contractGas = this.ethereumConfig.contracts[key].gas;
             let estimateGas = this.ethereumConfig.contracts[key].estimateGas;
             this.ethereumConfig.contracts[key].abi = contractData.abi;
-            promises.push(new Promise(async function(resolve, reject) {
+            promises.push(new Promise(async function (resolve, reject) {
                 let contractInstance = await self.deployContract(contractData);
                 logger.info('Deployed contract ' + contractData.name + ' at ' + contractInstance.options.address);
                 self.ethereumConfig.contracts[key].address = contractInstance.options.address;
@@ -92,15 +106,21 @@ class Odyssey extends BlockchainInterface {
      * @async
      */
     async getContext(name, args, clientIdx) {
+        console.log("getContext-------------------")
+        var ctrIdx = 0;
+
+        ctrIdx = clientIdx % this.web3.length
+
         let context = {
             clientIdx: clientIdx,
             contracts: {},
             nonces: {},
-            web3: this.web3
+            web3: this.web3[ctrIdx]
         };
+
         for (const key of Object.keys(args.contracts)) {
             context.contracts[key] = {
-                contract: new this.web3.eth.Contract(args.contracts[key].abi, args.contracts[key].address),
+                contract: new this.web3[ctrIdx].eth.Contract(args.contracts[key].abi, args.contracts[key].address),
                 gas: args.contracts[key].gas,
                 estimateGas: args.contracts[key].estimateGas
             };
@@ -112,11 +132,11 @@ class Odyssey extends BlockchainInterface {
             let hdwallet = EthereumHDKey.fromMasterSeed(this.ethereumConfig.fromAddressSeed);
             let wallet = hdwallet.derivePath('m/44\'/60\'/' + clientIdx + '\'/0/0').getWallet();
             context.fromAddress = wallet.getChecksumAddressString();
-            context.nonces[context.fromAddress] = await this.web3.eth.getTransactionCount(context.fromAddress);
-            this.web3.eth.accounts.wallet.add(wallet.getPrivateKeyString());
+            context.nonces[context.fromAddress] = await this.web3[ctrIdx].eth.getTransactionCount(context.fromAddress);
+            this.web3[ctrIdx].eth.accounts.wallet.add(wallet.getPrivateKeyString());
         } else if (this.ethereumConfig.fromAddressPrivateKey) {
-            context.nonces[this.ethereumConfig.fromAddress] = await this.web3.eth.getTransactionCount(this.ethereumConfig.fromAddress);
-            this.web3.eth.accounts.wallet.add(this.ethereumConfig.fromAddressPrivateKey);
+            context.nonces[this.ethereumConfig.fromAddress] = await this.web3[ctrIdx].eth.getTransactionCount(this.ethereumConfig.fromAddress);
+            this.web3[ctrIdx].eth.accounts.wallet.add(this.ethereumConfig.fromAddressPrivateKey);
         } else if (this.ethereumConfig.fromAddressPassword) {
             await context.web3.eth.personal.unlockAccount(this.ethereumConfig.fromAddress, this.ethereumConfig.fromAddressPassword, 1000);
         }
@@ -254,9 +274,10 @@ class Odyssey extends BlockchainInterface {
      * @returns {Promise<web3.eth.Contract>} The deployed contract instance
      */
     deployContract(contractData) {
-        let web3 = this.web3;
+        console.log("deployContract----------------------------")
+        let web3 = this.web3[0];
         let contractDeployerAddress = this.ethereumConfig.contractDeployerAddress;
-        return new Promise(function(resolve, reject) {
+        return new Promise(function (resolve, reject) {
             let contract = new web3.eth.Contract(contractData.abi);
             let contractDeploy = contract.deploy({
                 data: contractData.bytecode
@@ -279,7 +300,7 @@ class Odyssey extends BlockchainInterface {
      */
     async prepareClients(number) {
         let result = [];
-        for (let i = 0 ; i< number ; i++) {
+        for (let i = 0; i < number; i++) {
             result[i] = {contracts: this.ethereumConfig.contracts};
         }
         return result;
