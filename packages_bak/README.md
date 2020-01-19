@@ -1,0 +1,1 @@
+# Please remind that `npm rum bootstrap` is no longer suported, and this dir is not useful anymore, You can copy all packages into `node_modules/@hyperledger` and it will work!!

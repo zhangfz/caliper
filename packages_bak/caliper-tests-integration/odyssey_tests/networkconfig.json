@@ -1,0 +1,19 @@
+{
+    "caliper": {
+        "blockchain": "odyssey",
+        "command" : {}
+    },
+    "ethereum": {
+        "url": "http://localhost:8545",
+        "contractDeployerAddress": "0x7eff122b94897ea5b0e2a9abf47b86337fafebdc",
+        "contractDeployerAddressPassword": "1234",
+        "fromAddress": "0x7eff122b94897ea5b0e2a9abf47b86337fafebdc",
+        "fromAddressPassword": "1234",
+        "transactionConfirmationBlocks": 2,
+        "contracts": {
+            "simple": {
+                "path": "/home/will/caliper/packages/caliper-tests-integration/odyssey_tests/src/simple/simple.json"
+            }
+        }
+    }
+}
