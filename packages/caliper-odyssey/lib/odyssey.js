@@ -44,7 +44,7 @@ class Odyssey extends BlockchainInterface {
         this.workspaceRoot = workspace_root;
         this.ethereumConfig = require(config_path).ethereum;
 
-        var web3Clients =[]
+        var web3Clients =[];
         if (typeof (this.ethereumConfig.url) == 'object') {
             this.ethereumConfig.url.forEach(function (myurl) {
                 web3Clients.push(new Web3(myurl))
@@ -62,7 +62,7 @@ class Odyssey extends BlockchainInterface {
      * @return {object} Promise<boolean> True if the account got unlocked successful otherwise false.
      */
     init() {
-        console.log("init-------------------")
+        console.log("init-------------------");
 
         if (this.ethereumConfig.contractDeployerAddressPrivateKey) {
             this.web3[0].eth.accounts.wallet.add(this.ethereumConfig.contractDeployerAddressPrivateKey);
@@ -76,7 +76,7 @@ class Odyssey extends BlockchainInterface {
      * @return {object} Promise execution for all the contract creations.
      */
     async installSmartContract() {
-        console.log("installSmartContract-------------------")
+        console.log("installSmartContract-------------------");
         let promises = [];
         let self = this;
         logger.info('Creating contracts...');
@@ -106,10 +106,10 @@ class Odyssey extends BlockchainInterface {
      * @async
      */
     async getContext(name, args, clientIdx) {
-        console.log("getContext-------------------")
+        console.log("getContext-------------------");
         var ctrIdx = 0;
 
-        ctrIdx = clientIdx % this.web3.length
+        ctrIdx = clientIdx % this.web3.length;
 
         let context = {
             clientIdx: clientIdx,
