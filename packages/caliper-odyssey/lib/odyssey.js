@@ -44,7 +44,7 @@ class Odyssey extends BlockchainInterface {
         this.workspaceRoot = workspace_root;
         this.ethereumConfig = require(config_path).ethereum;
 
-        var web3Clients =[];
+        var web3Clients = [];
         if (typeof (this.ethereumConfig.url) == 'object') {
             this.ethereumConfig.url.forEach(function (myurl) {
                 web3Clients.push(new Web3(myurl))
@@ -106,7 +106,7 @@ class Odyssey extends BlockchainInterface {
      * @async
      */
     async getContext(name, args, clientIdx) {
-        console.log("getContext-------------------");
+        console.log("getContext-----clientIdx=", clientIdx);
         var ctrIdx = 0;
 
         ctrIdx = clientIdx % this.web3.length;
@@ -140,6 +140,7 @@ class Odyssey extends BlockchainInterface {
         } else if (this.ethereumConfig.fromAddressPassword) {
             await context.web3.eth.personal.unlockAccount(this.ethereumConfig.fromAddress, this.ethereumConfig.fromAddressPassword, 1000);
         }
+        console.log("context:", context);
         return context;
     }
 

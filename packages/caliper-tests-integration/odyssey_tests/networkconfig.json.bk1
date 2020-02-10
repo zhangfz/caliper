@@ -4,7 +4,7 @@
         "command" : {}
     },
     "ethereum": {
-        "url": ["http://172.16.124.92:8545"],
+        "url": ["http://127.0.0.1:8545"],
         "contractDeployerAddress": "0x7eff122b94897ea5b0e2a9abf47b86337fafebdc",
         "contractDeployerAddressPassword": "1234",
         "fromAddress": "0x7eff122b94897ea5b0e2a9abf47b86337fafebdc",
