@@ -306,6 +306,59 @@ class Odyssey extends BlockchainInterface {
         }
         return result;
     }
+
+    odysseyGetAccounts (iweb3) {
+        return new Promise(
+            (resolve) => {
+                iweb3.eth.getAccounts().then((ret) => {
+                    resolve(ret)
+                })
+            })
+    };
+
+    odysseyGetBalance (iweb3, address) {
+        return new Promise(
+            (resolve) => {
+                iweb3.eth.getBalance(address).then((ret) => {
+                    resolve(ret)
+                })
+            })
+
+    };
+
+    odysseyTransfer(iweb3, from, to, amount){
+        return new Promise(
+            (resolve) => {
+                iweb3.eth.sendTransaction({
+                    from: from,
+                    to: to,
+                    value: amount
+                }).then(function (receipt) {
+                    resolve(receipt);
+                });
+            })
+    };
+
+    odysseyCreatAccount(iweb3, pwd) {
+        return new Promise(
+            (resolve) => {
+                iweb3.eth.personal.newAccount(pwd, (e, ret) => {
+                    resolve(ret)
+                })
+            })
+    };
+
+    odysseyUnlock (iweb3, address, pwd, duration = 1000)  {
+
+        return new Promise(
+            (resolve) => {
+                iweb3.eth.personal.unlockAccount(address, pwd, duration).then((ret) => {
+                    resolve(ret)
+                })
+            })
+    };
+
+
 }
 
 module.exports = Odyssey;
