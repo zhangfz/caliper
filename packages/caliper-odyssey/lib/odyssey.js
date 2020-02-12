@@ -53,6 +53,7 @@ class Odyssey extends BlockchainInterface {
             web3Clients.push(new Web3(this.ethereumConfig.url))
         }
         // this.web3 = new Web3(this.ethereumConfig.url);
+        console.log('sintan1071 dev --- web3Clients', web3Clients.length);
         this.web3 = web3Clients;
         this.web3.transactionConfirmationBlocks = this.ethereumConfig.transactionConfirmationBlocks;
     }
@@ -69,6 +70,8 @@ class Odyssey extends BlockchainInterface {
         } else if (this.ethereumConfig.contractDeployerAddressPassword) {
             return this.web3[0].eth.personal.unlockAccount(this.ethereumConfig.contractDeployerAddress, this.ethereumConfig.contractDeployerAddressPassword, 1000);
         }
+
+
     }
 
     /**
@@ -125,21 +128,34 @@ class Odyssey extends BlockchainInterface {
                 estimateGas: args.contracts[key].estimateGas
             };
         }
-        if (this.ethereumConfig.fromAddress) {
-            context.fromAddress = this.ethereumConfig.fromAddress;
+
+        // if (this.ethereumConfig.fromAddress) {
+        //     context.fromAddress = this.ethereumConfig.fromAddress;
+        // }
+        // if (this.ethereumConfig.fromAddressSeed) {
+        //     let hdwallet = EthereumHDKey.fromMasterSeed(this.ethereumConfig.fromAddressSeed);
+        //     let wallet = hdwallet.derivePath('m/44\'/60\'/' + clientIdx + '\'/0/0').getWallet();
+        //     context.fromAddress = wallet.getChecksumAddressString();
+        //     context.nonces[context.fromAddress] = await this.web3[ctrIdx].eth.getTransactionCount(context.fromAddress);
+        //     this.web3[ctrIdx].eth.accounts.wallet.add(wallet.getPrivateKeyString());
+        // } else if (this.ethereumConfig.fromAddressPrivateKey) {
+        //     context.nonces[this.ethereumConfig.fromAddress] = await this.web3[ctrIdx].eth.getTransactionCount(this.ethereumConfig.fromAddress);
+        //     this.web3[ctrIdx].eth.accounts.wallet.add(this.ethereumConfig.fromAddressPrivateKey);
+        // } else if (this.ethereumConfig.fromAddressPassword) {
+        //     await context.web3.eth.personal.unlockAccount(this.ethereumConfig.fromAddress, this.ethereumConfig.fromAddressPassword, 1000);
+        // }
+
+        let accountsCount = this.calcWeb3ClientsAccountsCount(clientIdx);
+        let accounts = await this.odysseyGetAccounts(context.web3);
+        let accountsNeed = accountsCount - accounts.length;
+
+        for(let i = 0; i < accountsNeed; i++) {
+            let newAddress = await this.odysseyCreatAccount(context.web3, this.ethereumConfig.contractDeployerAddressPassword ? this.ethereumConfig.contractDeployerAddressPassword : '1234');
+            await this.odysseyTransfer(context.web3, this.ethereumConfig.contractDeployerAddress, newAddress, 10);
+            accounts.push(newAddress);
         }
-        if (this.ethereumConfig.fromAddressSeed) {
-            let hdwallet = EthereumHDKey.fromMasterSeed(this.ethereumConfig.fromAddressSeed);
-            let wallet = hdwallet.derivePath('m/44\'/60\'/' + clientIdx + '\'/0/0').getWallet();
-            context.fromAddress = wallet.getChecksumAddressString();
-            context.nonces[context.fromAddress] = await this.web3[ctrIdx].eth.getTransactionCount(context.fromAddress);
-            this.web3[ctrIdx].eth.accounts.wallet.add(wallet.getPrivateKeyString());
-        } else if (this.ethereumConfig.fromAddressPrivateKey) {
-            context.nonces[this.ethereumConfig.fromAddress] = await this.web3[ctrIdx].eth.getTransactionCount(this.ethereumConfig.fromAddress);
-            this.web3[ctrIdx].eth.accounts.wallet.add(this.ethereumConfig.fromAddressPrivateKey);
-        } else if (this.ethereumConfig.fromAddressPassword) {
-            await context.web3.eth.personal.unlockAccount(this.ethereumConfig.fromAddress, this.ethereumConfig.fromAddressPassword, 1000);
-        }
+        context.fromAddresses = accounts;
+
         console.log("context:", context);
         return context;
     }
@@ -307,55 +323,78 @@ class Odyssey extends BlockchainInterface {
         return result;
     }
 
+    /**
+     * 用来计算发送交易客户端的账户数量
+     * @param {Number} ClientIndex
+     * @returns {Number} 账户数量
+     */
+    calcWeb3ClientsAccountsCount(clientIdx) {
+        let sequence = clientIdx % this.web3.length;
+        let tag = Math.floor(clientIdx / this.web3.length);
+        let round = Math.floor((this.ethereumConfig.clientsNumber - 1) / this.web3.length);
+        let remainder = (this.ethereumConfig.clientsNumber - 1) % this.web3.length;
+        let web3ClientsCount = round + (sequence <= remainder ? 1 : 0);
+        let web3ClientsAccountsCount = web3ClientsCount * this.ethereumConfig.accountsPerClient;
+        return web3ClientsAccountsCount;
+    }
+
     odysseyGetAccounts (iweb3) {
-        return new Promise(
-            (resolve) => {
-                iweb3.eth.getAccounts().then((ret) => {
-                    resolve(ret)
-                })
-            })
+        // return new Promise(
+        //     (resolve) => {
+        //         iweb3.eth.getAccounts().then((ret) => {
+        //             resolve(ret)
+        //         })
+        //     })
+        return iweb3.eth.getAccounts();
     };
 
     odysseyGetBalance (iweb3, address) {
-        return new Promise(
-            (resolve) => {
-                iweb3.eth.getBalance(address).then((ret) => {
-                    resolve(ret)
-                })
-            })
-
+        // return new Promise(
+        //     (resolve) => {
+        //         iweb3.eth.getBalance(address).then((ret) => {
+        //             resolve(ret)
+        //         })
+        //     })
+        return iweb3.eth.getBalance(address);
     };
 
     odysseyTransfer(iweb3, from, to, amount){
-        return new Promise(
-            (resolve) => {
-                iweb3.eth.sendTransaction({
+        // return new Promise(
+        //     (resolve) => {
+        //         iweb3.eth.sendTransaction({
+        //             from: from,
+        //             to: to,
+        //             value: amount
+        //         }).then(function (receipt) {
+        //             resolve(receipt);
+        //         });
+        //     })
+        return iweb3.eth.sendTransaction({
                     from: from,
                     to: to,
                     value: amount
-                }).then(function (receipt) {
-                    resolve(receipt);
                 });
-            })
     };
 
     odysseyCreatAccount(iweb3, pwd) {
-        return new Promise(
-            (resolve) => {
-                iweb3.eth.personal.newAccount(pwd, (e, ret) => {
-                    resolve(ret)
-                })
-            })
+        // return new Promise(
+        //     (resolve) => {
+        //         iweb3.eth.personal.newAccount(pwd, (e, ret) => {
+        //             resolve(ret)
+        //         })
+        //     })
+        return iweb3.eth.personal.newAccount(pwd);
     };
 
     odysseyUnlock (iweb3, address, pwd, duration = 1000)  {
 
-        return new Promise(
-            (resolve) => {
-                iweb3.eth.personal.unlockAccount(address, pwd, duration).then((ret) => {
-                    resolve(ret)
-                })
-            })
+        // return new Promise(
+        //     (resolve) => {
+        //         iweb3.eth.personal.unlockAccount(address, pwd, duration).then((ret) => {
+        //             resolve(ret)
+        //         })
+        //     })
+        return iweb3.eth.personal.unlockAccount(address, pwd, duration);
     };
 
 

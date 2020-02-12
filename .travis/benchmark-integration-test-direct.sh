@@ -18,7 +18,7 @@ set -e
 set -o pipefail
 
 # Bootstrap the project again
-npm i && npm run repoclean -- --yes && npm run bootstrap
+# npm i && npm run repoclean -- --yes && npm run bootstrap
 
 # Call CLI directly
 # The CWD will be in one of the caliper-tests-integration/*_tests directories

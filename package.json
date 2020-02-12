@@ -19,7 +19,10 @@
     "npm": ">=5.6.0"
   },
   "dependencies": {
-    "@hyperledger/caliper-cli": "^0.2.0"
+    "@hyperledger/caliper-cli": "^0.2.0",
+    "color-scheme": "^1.0.1",
+    "ethereumjs-wallet": "^0.6.3",
+    "web3": "^1.2.6"
   },
   "devDependencies": {
     "lerna": "^3.18.3",
