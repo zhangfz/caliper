@@ -70,8 +70,6 @@ class Odyssey extends BlockchainInterface {
         } else if (this.ethereumConfig.contractDeployerAddressPassword) {
             return this.web3[0].eth.personal.unlockAccount(this.ethereumConfig.contractDeployerAddress, this.ethereumConfig.contractDeployerAddressPassword, 1000);
         }
-
-
     }
 
     /**
@@ -144,17 +142,6 @@ class Odyssey extends BlockchainInterface {
         // } else if (this.ethereumConfig.fromAddressPassword) {
         //     await context.web3.eth.personal.unlockAccount(this.ethereumConfig.fromAddress, this.ethereumConfig.fromAddressPassword, 1000);
         // }
-
-        let accountsCount = this.calcWeb3ClientsAccountsCount(clientIdx);
-        let accounts = await this.odysseyGetAccounts(context.web3);
-        let accountsNeed = accountsCount - accounts.length;
-
-        for(let i = 0; i < accountsNeed; i++) {
-            let newAddress = await this.odysseyCreatAccount(context.web3, this.ethereumConfig.contractDeployerAddressPassword ? this.ethereumConfig.contractDeployerAddressPassword : '1234');
-            await this.odysseyTransfer(context.web3, this.ethereumConfig.contractDeployerAddress, newAddress, 10);
-            accounts.push(newAddress);
-        }
-        context.fromAddresses = accounts;
 
         console.log("context:", context);
         return context;
@@ -323,17 +310,57 @@ class Odyssey extends BlockchainInterface {
         return result;
     }
 
+    async prepareAccounts() {
+        let addresses = {};
+        let isUsed = function (key) {
+            if (addresses.hasOwnProperty(key)) {
+                return true;
+            } else {
+                addresses[key] = true;
+                return false;
+            }
+        }
+
+        for (let i = 0; i < this.web3.length; i++) {
+            let accounts = [];
+
+            let accountsCount = this.calcWeb3ClientsAccountsCount(i);
+            let accountsHas = await this.odysseyGetAccounts(this.web3[i]);
+
+            for(let j = 0; j < accountsHas; j++) {
+                const ele = accountsHas[j];
+                console.log(ele + 'is used: ', isUsed(ele));
+                if(!isUsed(ele)) {
+                    let balance = await this.odysseyGetBalance(this.web3[i], ele);
+                    if(balance <= 0) await this.odysseyTransfer(this.web3[i], this.ethereumConfig.contractDeployerAddress, ele, 1);
+                    accounts.push(ele);
+                }
+            }
+
+            let accountsNeed = accountsCount - accounts.length;
+
+            for(let j = 0; j < accountsNeed; j++) {
+                let newAddress = await this.odysseyCreatAccount(this.web3[i], this.ethereumConfig.contractDeployerAddressPassword | '1234');
+                await this.odysseyTransfer(this.web3[i], this.ethereumConfig.contractDeployerAddress, newAddress, 1);
+                accounts.push(newAddress);
+            }
+            this.web3[i].fromAddresses = accounts;
+        }
+
+    }
+
     /**
      * 用来计算发送交易客户端的账户数量
      * @param {Number} ClientIndex
      * @returns {Number} 账户数量
      */
-    calcWeb3ClientsAccountsCount(clientIdx) {
-        let sequence = clientIdx % this.web3.length;
-        let tag = Math.floor(clientIdx / this.web3.length);
+    // calcWeb3ClientsAccountsCount(clientIdx) {
+    calcWeb3ClientsAccountsCount(sequence) {
+        // let sequence = clientIdx % this.web3.length;
+        // let tag = Math.floor(clientIdx / this.web3.length);
         let round = Math.floor((this.ethereumConfig.clientsNumber - 1) / this.web3.length);
         let remainder = (this.ethereumConfig.clientsNumber - 1) % this.web3.length;
-        let web3ClientsCount = round + (sequence <= remainder ? 1 : 0);
+        let web3ClientsCount = round + (sequence <= remainder ? 1 : 0); // 连接到web3s数组下标为sequence的web3的clients的总数
         let web3ClientsAccountsCount = web3ClientsCount * this.ethereumConfig.accountsPerClient;
         return web3ClientsAccountsCount;
     }
