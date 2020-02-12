@@ -62,7 +62,7 @@ class Odyssey extends BlockchainInterface {
      * Initialize the {Odyssey} object.
      * @return {object} Promise<boolean> True if the account got unlocked successful otherwise false.
      */
-    init() {
+    async init() {
         console.log("init-------------------");
 
         if (this.ethereumConfig.contractDeployerAddressPrivateKey) {
@@ -70,6 +70,8 @@ class Odyssey extends BlockchainInterface {
         } else if (this.ethereumConfig.contractDeployerAddressPassword) {
             return this.web3[0].eth.personal.unlockAccount(this.ethereumConfig.contractDeployerAddress, this.ethereumConfig.contractDeployerAddressPassword, 1000);
         }
+
+        await this.prepareAccounts();
     }
 
     /**
