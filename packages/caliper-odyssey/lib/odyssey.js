@@ -44,7 +44,7 @@ class Odyssey extends BlockchainInterface {
         this.workspaceRoot = workspace_root;
         this.ethereumConfig = require(config_path).ethereum;
 
-        var web3Clients = [];
+        let web3Clients = [];
         if (typeof (this.ethereumConfig.url) == 'object') {
             this.ethereumConfig.url.forEach(function (myurl) {
                 web3Clients.push(new Web3(myurl))
@@ -110,7 +110,7 @@ class Odyssey extends BlockchainInterface {
      */
     async getContext(name, args, clientIdx) {
         console.log("getContext-----clientIdx=", clientIdx);
-        var ctrIdx = 0;
+        let ctrIdx = 0;
 
         ctrIdx = clientIdx % this.web3.length;
 
@@ -144,6 +144,11 @@ class Odyssey extends BlockchainInterface {
         // } else if (this.ethereumConfig.fromAddressPassword) {
         //     await context.web3.eth.personal.unlockAccount(this.ethereumConfig.fromAddress, this.ethereumConfig.fromAddressPassword, 1000);
         // }
+
+        let flag = Math.floor(clientIdx / this.web3.length);
+        let start = flag * this.ethereumConfig.accountsPerClient;
+        let end = (flag * this.ethereumConfig.accountsPerClient) + this.ethereumConfig.accountsPerClient; // javascript 的数组end不用减一来作为数组下标处理，因为是一个左闭右开的区间
+        context.fromAddresses = this.web3[ctrIdx].fromAddresses.slice(start, end);
 
         console.log("context:", context);
         return context;
@@ -215,8 +220,16 @@ class Odyssey extends BlockchainInterface {
      * @return {Promise<TxStatus>} Result and stats of the transaction invocation.
      */
     async sendTransaction(context, contractID, contractVer, methodCall, timeout) {
+        let promises = [];
+        context.fromAddresses.forEach((item, index) => {
+            promises.push(this.sendSingleTransaction(context, contractID, contractVer, item, timeout, item));
+        });
+        return Promise.all(promises);
+    }
+
+    async sendSingleTransaction(context, contractID, contractVer, methodCall, timeout, address) {
         let status = new TxStatus();
-        let params = {from: context.fromAddress};
+        let params = {from: address};
         let contractInfo = context.contracts[contractID];
         try {
             context.engine.submitCallback(1);
@@ -224,9 +237,9 @@ class Odyssey extends BlockchainInterface {
             let methodType = 'send';
             if (methodCall.isView) {
                 methodType = 'call';
-            } else if (context.nonces && (typeof context.nonces[context.fromAddress] !== 'undefined')) {
-                let nonce = context.nonces[context.fromAddress];
-                context.nonces[context.fromAddress] = nonce + 1;
+            } else if (context.nonces && (typeof context.nonces[address] !== 'undefined')) {
+                let nonce = context.nonces[address];
+                context.nonces[address] = nonce + 1;
                 params.nonce = nonce;
             }
             if (methodCall.args) {
@@ -359,7 +372,7 @@ class Odyssey extends BlockchainInterface {
     // calcWeb3ClientsAccountsCount(clientIdx) {
     calcWeb3ClientsAccountsCount(sequence) {
         // let sequence = clientIdx % this.web3.length;
-        // let tag = Math.floor(clientIdx / this.web3.length);
+        // let flag = Math.floor(clientIdx / this.web3.length);
         let round = Math.floor((this.ethereumConfig.clientsNumber - 1) / this.web3.length);
         let remainder = (this.ethereumConfig.clientsNumber - 1) % this.web3.length;
         let web3ClientsCount = round + (sequence <= remainder ? 1 : 0); // 连接到web3s数组下标为sequence的web3的clients的总数
