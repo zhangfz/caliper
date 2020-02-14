@@ -18,7 +18,7 @@ const EthereumHDKey = require('ethereumjs-wallet/hdkey');
 const Web3 = require('web3');
 const {BlockchainInterface, CaliperUtils, TxStatus} = require('@hyperledger/caliper-core');
 const logger = CaliperUtils.getLogger('odyssey.js');
-
+const path = require('path');
 /**
  * @typedef {Object} EthereumInvoke
  *
@@ -84,7 +84,8 @@ class Odyssey extends BlockchainInterface {
         let self = this;
         logger.info('Creating contracts...');
         for (const key of Object.keys(this.ethereumConfig.contracts)) {
-            let contractData = require(CaliperUtils.resolvePath(this.ethereumConfig.contracts[key].path, this.workspaceRoot)); // TODO remove path property
+            //let contractData = require(CaliperUtils.resolvePath(this.ethereumConfig.contracts[key].path, this.workspaceRoot)); // TODO remove path property
+            let contractData = require(path.resolve(this.workspaceRoot, this.ethereumConfig.contracts[key].path));
             let contractGas = this.ethereumConfig.contracts[key].gas;
             let estimateGas = this.ethereumConfig.contracts[key].estimateGas;
             this.ethereumConfig.contracts[key].abi = contractData.abi;
