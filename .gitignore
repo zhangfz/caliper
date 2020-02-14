@@ -1,4 +1,4 @@
-*.bak
+*bak*
 
 # Ignore any generated html files, but include the report html template
 *.html

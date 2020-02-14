@@ -62,7 +62,7 @@ class Odyssey extends BlockchainInterface {
      * Initialize the {Odyssey} object.
      * @return {object} Promise<boolean> True if the account got unlocked successful otherwise false.
      */
-    async init() {
+    init() {
         console.log("init-------------------");
 
         if (this.ethereumConfig.contractDeployerAddressPrivateKey) {
@@ -70,8 +70,6 @@ class Odyssey extends BlockchainInterface {
         } else if (this.ethereumConfig.contractDeployerAddressPassword) {
             return this.web3[0].eth.personal.unlockAccount(this.ethereumConfig.contractDeployerAddress, this.ethereumConfig.contractDeployerAddressPassword, 1000);
         }
-
-        await this.prepareAccounts();
     }
 
     /**
@@ -109,6 +107,9 @@ class Odyssey extends BlockchainInterface {
      * @async
      */
     async getContext(name, args, clientIdx) {
+        await this.prepareAccounts();
+
+        console.log('sintan1071 dev --- CHECK 2 this.web3', this.web3)
         console.log("getContext-----clientIdx=", clientIdx);
         let ctrIdx = 0;
 
@@ -180,7 +181,9 @@ class Odyssey extends BlockchainInterface {
             invocations = invokeData;
         }
         let promises = [];
+        console.log('sintan1071 dev --- CHECK invocations', invocations);
         invocations.forEach((item, index) => {
+            console.log('sintan1071 dev --- CHECK invocations index item', index, item);
             promises.push(this.sendTransaction(context, contractID, contractVer, item, timeout));
         });
         return Promise.all(promises);
@@ -361,7 +364,7 @@ class Odyssey extends BlockchainInterface {
             }
             this.web3[i].fromAddresses = accounts;
         }
-
+        console.log('sintan1071 dev --- CHECK 1 this.web3', this.web3)
     }
 
     /**
