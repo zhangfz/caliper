@@ -78,7 +78,7 @@ class Odyssey extends BlockchainInterface {
         if (this.ethereumConfig.contractDeployerAddressPrivateKey) {
             this.web3[0].eth.accounts.wallet.add(this.ethereumConfig.contractDeployerAddressPrivateKey);
         } else if (this.ethereumConfig.contractDeployerAddressPassword) {
-            return this.web3[0].eth.personal.unlockAccount(this.ethereumConfig.contractDeployerAddress, this.ethereumConfig.contractDeployerAddressPassword, 1000);
+            return this.web3[0].eth.personal.unlockAccount(this.ethereumConfig.contractDeployerAddress, this.ethereumConfig.contractDeployerAddressPassword, 100000);
         }
     }
 
@@ -372,7 +372,7 @@ class Odyssey extends BlockchainInterface {
                     console.log(ele + ' is not used');
                     let balance = await this.odysseyGetBalance(this.web3[i], ele);
                     if(balance <= 18000000000000000) await this.odysseyTransfer(this.web3[i], this.ethereumConfig.contractDeployerAddress, ele, 1);
-                    await this.web3[i].eth.personal.unlockAccount(ele, this.ethereumConfig.contractDeployerAddressPassword | '1234', 1000);
+                    await this.web3[i].eth.personal.unlockAccount(ele, this.ethereumConfig.contractDeployerAddressPassword | '1234', 100000);
                     accounts.push(ele);
                 }
             }
@@ -383,8 +383,10 @@ class Odyssey extends BlockchainInterface {
 
             for(let j = 0; j < accountsNeed; j++) {
                 let newAddress = await this.odysseyCreatAccount(this.web3[i], this.ethereumConfig.contractDeployerAddressPassword | '1234');
+                this.keyCheck.isUsed(newAddress);
                 console.log('sintan1071 dev --- 新建的账户 newAddress num', j+1);
                 await this.odysseyTransfer(this.web3[i], this.ethereumConfig.contractDeployerAddress, newAddress, 1);
+                await this.web3[i].eth.personal.unlockAccount(newAddress, this.ethereumConfig.contractDeployerAddressPassword | '1234', 100000);
                 accounts.push(newAddress);
             }
             console.log('sintan1071 dev --- 所有账户 this.web3[' + i + '].fromAddress', accounts);

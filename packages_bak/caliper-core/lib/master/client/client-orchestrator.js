@@ -67,6 +67,7 @@ class ClientOrchestrator {
         this.updates.id++;
 
         const results = [];
+        console.log('sintan1071 dev --- debug 1 start test and this', test, this);
         await this._startTest(this.number, test, this.updates.data, results);
         const testOutput = this.formatResults(results);
         return testOutput;
@@ -144,6 +145,7 @@ class ClientOrchestrator {
             }
 
             // send test specification to client and update idx
+            console.log('sintan1071 dev --- debug 2 client.obj.send test', test);
             client.obj.send(test);
             idx++;
         }
