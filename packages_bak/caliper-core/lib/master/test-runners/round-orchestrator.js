@@ -183,7 +183,10 @@ class RoundOrchestrator {
 
             try {
                 this.testObserver.startWatch(this.clientOrchestrator);
+                // add by SinTan1071 在此处开启测试
+                console.log('sintan1071 dev --- debug 0');
                 const {results, start, end} = await this.clientOrchestrator.startTest(roundConfig);
+                console.log('sintan1071 dev --- debug 00');
                 await this.testObserver.stopWatch();
 
                 // Build the report
@@ -195,8 +198,10 @@ class RoundOrchestrator {
                     idx = await this.report.processLocalTPSResults(results, roundConfig);
                 }
 
+                console.log('sintan1071 dev --- debug 000 idx', idx);
                 // - Resource utilization
                 await this.report.buildRoundResourceStatistics(idx, roundConfig.label);
+                console.log('sintan1071 dev --- debug 001');
 
                 success++;
                 logger.info(`Finished round ${index + 1} (${roundConfig.label}) in ${(end - start) / 1000.0} seconds`);
@@ -215,6 +220,7 @@ class RoundOrchestrator {
         }
 
         // clean up, with "silent" failure handling
+        console.log('sintan1071 dev --- debug 002', this.report);
         try {
             this.report.printResultsByRound();
             await this.report.finalize();

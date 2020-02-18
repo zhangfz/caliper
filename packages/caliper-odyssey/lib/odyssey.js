@@ -45,7 +45,7 @@ class Odyssey extends BlockchainInterface {
         this.ethereumConfig = require(config_path).ethereum;
         this.keyCheck = {};
         this.keyCheck.isUsed = function (key) {
-            console.log('keyCheck this', this)
+            // console.log('keyCheck this', this)
             if (this.hasOwnProperty(key)) {
                 return true;
             } else {
@@ -63,7 +63,7 @@ class Odyssey extends BlockchainInterface {
             web3Clients.push(new Web3(this.ethereumConfig.url))
         }
         // this.web3 = new Web3(this.ethereumConfig.url);
-        console.log('sintan1071 dev --- web3Clients.length', web3Clients.length);
+        // console.log('sintan1071 dev --- web3Clients.length', web3Clients.length);
         this.web3 = web3Clients;
         this.web3.transactionConfirmationBlocks = this.ethereumConfig.transactionConfirmationBlocks;
     }
@@ -118,16 +118,17 @@ class Odyssey extends BlockchainInterface {
      * @async
      */
     async getContext(name, args, clientIdx) {
-        console.log('sintan1071 dev --- CHECK this.web3', this.web3)
         console.log("getContext-----clientIdx=", clientIdx);
         let ctrIdx = 0;
 
         ctrIdx = clientIdx % this.web3.length;
+        console.log('sintan1071 dev --- CHECK 1 No.'+ clientIdx +' this.web3['+ ctrIdx +'].fromAddresses.length', (this.web3[ctrIdx].fromAddresses ? this.web3[ctrIdx].fromAddresses.length : 0), this.web3[ctrIdx].fromAddresses);
 
         if(!this.web3[ctrIdx].fromAddresses) {
-            console.log("getContext-----web3 has no fromAddress, and do prepare accounts", clientIdx);
+            console.log("getContext-----No."+ clientIdx +" client use web3["+ ctrIdx +"] has no fromAddress, and do prepare accounts", clientIdx);
             await this.prepareAccounts(ctrIdx);
         }
+        console.log('sintan1071 dev --- CHECK 2 No.'+ clientIdx +' this.web3['+ ctrIdx +'].fromAddresses.length', this.web3[ctrIdx].fromAddresses.length, this.web3[ctrIdx].fromAddresses);
 
         let context = {
             clientIdx: clientIdx,
@@ -165,7 +166,7 @@ class Odyssey extends BlockchainInterface {
         let end = (flag * this.ethereumConfig.accountsPerClient) + this.ethereumConfig.accountsPerClient; // javascript 的数组end不用减一来作为数组下标处理，因为是一个左闭右开的区间
         context.fromAddresses = this.web3[ctrIdx].fromAddresses.slice(start, end);
 
-        console.log("context:", context);
+        console.log("sintan1071 dev --- CHECK 3 No."+ clientIdx +" this.web3["+ ctrIdx +"] context.fromAddresses is slice:", context.fromAddresses);
         return context;
     }
 
@@ -360,9 +361,9 @@ class Odyssey extends BlockchainInterface {
             let accounts = [];
 
             let accountsCount = this.calcWeb3ClientsAccountsCount(i);
-            console.log('sintan1071 dev --- 需要的总账户数', accountsCount);
+            console.log('sintan1071 dev --- 需要的总账户数this.web3[' + i + ']', accountsCount);
             let accountsHas = await this.odysseyGetAccounts(this.web3[i]);
-            console.log('sintan1071 dev --- 本地已存在的账户 accountsHas.length', accountsHas.length);
+            console.log('sintan1071 dev --- 本地已存在的账户this.web3[' + i + '] accountsHas.length', accountsHas.length);
 
             // for(let j = 0; j < accountsHas; j++) {
             // 因为存在本地账户数目accountsHas.length比accountsCount多的情况
@@ -377,14 +378,14 @@ class Odyssey extends BlockchainInterface {
                 }
             }
 
-            console.log('sintan1071 dev --- 现在已经准备好的账户 accounts', accounts.length);
+            console.log('sintan1071 dev --- 现在已经准备好的账户this.web3[' + i + '] accounts', accounts.length);
             let accountsNeed = accountsCount - accounts.length;
-            console.log('sintan1071 dev --- 需要新建的账户数 accountsNeed', accountsNeed);
+            console.log('sintan1071 dev --- 需要新建的账户数this.web3[' + i + '] accountsNeed', accountsNeed);
 
             for(let j = 0; j < accountsNeed; j++) {
                 let newAddress = await this.odysseyCreatAccount(this.web3[i], this.ethereumConfig.contractDeployerAddressPassword | '1234');
                 this.keyCheck.isUsed(newAddress);
-                console.log('sintan1071 dev --- 新建的账户 newAddress num', j+1);
+                console.log('sintan1071 dev --- 新建的账户this.web3[' + i + '] newAddress num', j+1, newAddress);
                 await this.odysseyTransfer(this.web3[i], this.ethereumConfig.contractDeployerAddress, newAddress, 1);
                 await this.web3[i].eth.personal.unlockAccount(newAddress, this.ethereumConfig.contractDeployerAddressPassword | '1234', 100000);
                 accounts.push(newAddress);

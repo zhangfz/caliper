@@ -69,7 +69,9 @@ class ClientOrchestrator {
         const results = [];
         console.log('sintan1071 dev --- debug 1 start test and this', test, this);
         await this._startTest(this.number, test, this.updates.data, results);
+        console.log('sintan1071 dev --- debug 1.1', this.number, this.updates.data, results);
         const testOutput = this.formatResults(results);
+        console.log('sintan1071 dev --- debug 1.2', testOutput);
         return testOutput;
     }
 
@@ -147,10 +149,13 @@ class ClientOrchestrator {
             // send test specification to client and update idx
             console.log('sintan1071 dev --- debug 2 client.obj.send test', test);
             client.obj.send(test);
+            console.log('sintan1071 dev --- debug 2.1', client);
             idx++;
         }
 
+        console.log('sintan1071 dev --- debug 2.2', idx, promises);
         await Promise.all(promises);
+        console.log('sintan1071 dev --- debug 2.3');
         // clear promises
         for (let client in this.processes) {
             if (client.obj && client.ob.promise) {
