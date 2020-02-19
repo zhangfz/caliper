@@ -201,7 +201,9 @@ class Odyssey extends BlockchainInterface {
         console.log('sintan1071 dev --- CHECK invocations', invocations);
         invocations.forEach((item, index) => {
             console.log('sintan1071 dev --- CHECK invocations index item', index, item);
-            promises.push(this.sendTransaction(context, contractID, contractVer, item, timeout));
+            for(let i = 0; i < context.fromAddresses.length; i++) {
+                promises.push(this.sendTransaction(context, contractID, contractVer, item, timeout, context.fromAddresses[i]));
+            }
         });
         return Promise.all(promises);
     }
@@ -227,7 +229,9 @@ class Odyssey extends BlockchainInterface {
         let promises = [];
         invocations.forEach((item, index) => {
             item.isView = true;
-            promises.push(this.sendTransaction(context, contractID, contractVer, item, timeout));
+            for(let i = 0; i < context.fromAddresses.length; i++) {
+                promises.push(this.sendTransaction(context, contractID, contractVer, item, timeout, context.fromAddresses[i]));
+            }
         });
         return Promise.all(promises);
     }
@@ -241,17 +245,7 @@ class Odyssey extends BlockchainInterface {
      * @param {Number} timeout Request timeout, in seconds.
      * @return {Promise<TxStatus>} Result and stats of the transaction invocation.
      */
-    async sendTransaction(context, contractID, contractVer, methodCall, timeout) {
-        console.log("sendTransaction-------------------");
-
-        let promises = [];
-        context.fromAddresses.forEach((item, index) => {
-            promises.push(this.sendSingleTransaction(context, contractID, contractVer, methodCall, timeout, item));
-        });
-        return Promise.all(promises);
-    }
-
-    async sendSingleTransaction(context, contractID, contractVer, methodCall, timeout, address) {
+    async sendTransaction(context, contractID, contractVer, methodCall, timeout, address) {
         let status = new TxStatus();
         let params = {from: address};
         let contractInfo = context.contracts[contractID];
@@ -311,7 +305,12 @@ class Odyssey extends BlockchainInterface {
             args: [key],
             isView: true
         };
-        return this.sendTransaction(context, contractID, contractVer, methodCall, 60);
+        // return this.sendTransaction(context, contractID, contractVer, methodCall, 60);
+        let promises = [];
+        for(let i = 0; i < context.fromAddresses.length; i++) {
+            promises.push(this.sendTransaction(context, contractID, contractVer, methodCall, 60, context.fromAddresses[i]));
+        }
+        return Promise.all(promises);
     }
 
     /**

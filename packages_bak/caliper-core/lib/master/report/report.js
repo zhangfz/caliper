@@ -295,10 +295,8 @@ class Report {
     async buildRoundResourceStatistics(idx, label) {
         // Retrieve statistics from all monitors
         const types = this.monitorOrchestrator.getAllMonitorTypes();
-        console.log('sintan1071 dev --- debug 3 types', types);
         for (const type of types) {
             const { resourceStats, chartStats } = await this.monitorOrchestrator.getStatisticsForMonitor(type, label);
-            console.log('sintan1071 dev --- debug 4 resourceStats', resourceStats);
             const resourceTable = this.convertToTable(resourceStats);
             if (resourceTable.length > 0) {
                 Logger.info(`### ${type} resource stats ###'`);
