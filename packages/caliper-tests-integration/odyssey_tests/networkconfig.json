@@ -4,14 +4,15 @@
         "command" : {}
     },
     "ethereum": {
-        "url": ["http://127.0.0.1:1723"],
-        "contractDeployerAddressPrivateKey": "80c6cfa12dec865c233157b195e9a355f77dbaca30c370af910d82a4fcc9d9e8",
-        "contractDeployerAddress": "0x54e81B874CCC74D072D8fd780119eD8663154113",
-        "fromAddress": "0x54e81B874CCC74D072D8fd780119eD8663154113",
+        "url": ["http://172.16.124.92:8545","http://172.16.124.93:8545","http://172.16.124.94:8545","http://172.16.124.95:8545"],
+        "contractDeployerAddress": "0x7eff122b94897ea5b0e2a9abf47b86337fafebdc",
+        "contractDeployerAddressPassword": "1234",
+        "fromAddress": "0x7eff122b94897ea5b0e2a9abf47b86337fafebdc",
+        "fromAddressPassword": "1234",
         "transactionConfirmationBlocks": 1,
         "contracts": {
             "simple": {
-                "path": "/Users/SinTan1071/WWW/code/blockchain/caliper_zhangfz/packages/caliper-tests-integration/odyssey_tests/src/simple/simple.json"
+                "path": "./src/simple/simple.json"
             }
         },
         "clientsNumber": 4,

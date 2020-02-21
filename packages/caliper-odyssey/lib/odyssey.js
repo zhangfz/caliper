@@ -19,6 +19,7 @@ const Web3 = require('web3');
 const {BlockchainInterface, CaliperUtils, TxStatus} = require('@hyperledger/caliper-core');
 const logger = CaliperUtils.getLogger('odyssey.js');
 const path = require('path');
+
 /**
  * @typedef {Object} EthereumInvoke
  *
@@ -122,13 +123,13 @@ class Odyssey extends BlockchainInterface {
         let ctrIdx = 0;
 
         ctrIdx = clientIdx % this.web3.length;
-        console.log('sintan1071 dev --- CHECK 1 No.'+ clientIdx +' this.web3['+ ctrIdx +'].fromAddresses.length', (this.web3[ctrIdx].fromAddresses ? this.web3[ctrIdx].fromAddresses.length : 0), this.web3[ctrIdx].fromAddresses);
+        console.log('sintan1071 dev --- CHECK 1 No.' + clientIdx + ' this.web3[' + ctrIdx + '].fromAddresses.length', (this.web3[ctrIdx].fromAddresses ? this.web3[ctrIdx].fromAddresses.length : 0), this.web3[ctrIdx].fromAddresses);
 
-        if(!this.web3[ctrIdx].fromAddresses) {
-            console.log("getContext-----No."+ clientIdx +" client use web3["+ ctrIdx +"] has no fromAddress, and do prepare accounts", clientIdx);
+        if (!this.web3[ctrIdx].fromAddresses) {
+            console.log("getContext-----No." + clientIdx + " client use web3[" + ctrIdx + "] has no fromAddress, and do prepare accounts", clientIdx);
             await this.prepareAccounts(ctrIdx);
         }
-        console.log('sintan1071 dev --- CHECK 2 No.'+ clientIdx +' this.web3['+ ctrIdx +'].fromAddresses.length', this.web3[ctrIdx].fromAddresses.length, this.web3[ctrIdx].fromAddresses);
+        console.log('sintan1071 dev --- CHECK 2 No.' + clientIdx + ' this.web3[' + ctrIdx + '].fromAddresses.length', this.web3[ctrIdx].fromAddresses.length, this.web3[ctrIdx].fromAddresses);
 
         let context = {
             clientIdx: clientIdx,
@@ -166,7 +167,7 @@ class Odyssey extends BlockchainInterface {
         let end = (flag * this.ethereumConfig.accountsPerClient) + this.ethereumConfig.accountsPerClient; // javascript 的数组end不用减一来作为数组下标处理，因为是一个左闭右开的区间
         context.fromAddresses = this.web3[ctrIdx].fromAddresses.slice(start, end);
 
-        console.log("sintan1071 dev --- CHECK 3 No."+ clientIdx +" this.web3["+ ctrIdx +"] context.fromAddresses is slice:", context.fromAddresses);
+        console.log("sintan1071 dev --- CHECK 3 No." + clientIdx + " this.web3[" + ctrIdx + "] context.fromAddresses is slice:", context.fromAddresses);
         return context;
     }
 
@@ -201,7 +202,7 @@ class Odyssey extends BlockchainInterface {
         console.log('sintan1071 dev --- CHECK invocations', invocations);
         invocations.forEach((item, index) => {
             console.log('sintan1071 dev --- CHECK invocations index item', index, item);
-            for(let i = 0; i < context.fromAddresses.length; i++) {
+            for (let i = 0; i < context.fromAddresses.length; i++) {
                 promises.push(this.sendTransaction(context, contractID, contractVer, item, timeout, context.fromAddresses[i]));
             }
         });
@@ -229,7 +230,7 @@ class Odyssey extends BlockchainInterface {
         let promises = [];
         invocations.forEach((item, index) => {
             item.isView = true;
-            for(let i = 0; i < context.fromAddresses.length; i++) {
+            for (let i = 0; i < context.fromAddresses.length; i++) {
                 promises.push(this.sendTransaction(context, contractID, contractVer, item, timeout, context.fromAddresses[i]));
             }
         });
@@ -307,7 +308,7 @@ class Odyssey extends BlockchainInterface {
         };
         // return this.sendTransaction(context, contractID, contractVer, methodCall, 60);
         let promises = [];
-        for(let i = 0; i < context.fromAddresses.length; i++) {
+        for (let i = 0; i < context.fromAddresses.length; i++) {
             promises.push(this.sendTransaction(context, contractID, contractVer, methodCall, 60, context.fromAddresses[i]));
         }
         return Promise.all(promises);
@@ -357,40 +358,40 @@ class Odyssey extends BlockchainInterface {
         console.log("prepareAccounts-------------------");
 
         // for (let i = 0; i < this.web3.length; i++) {
-            let accounts = [];
+        let accounts = [];
 
-            let accountsCount = this.calcWeb3ClientsAccountsCount(i);
-            console.log('sintan1071 dev --- 需要的总账户数this.web3[' + i + ']', accountsCount);
-            let accountsHas = await this.odysseyGetAccounts(this.web3[i]);
-            console.log('sintan1071 dev --- 本地已存在的账户this.web3[' + i + '] accountsHas.length', accountsHas.length);
+        let accountsCount = this.calcWeb3ClientsAccountsCount(i);
+        console.log('sintan1071 dev --- 需要的总账户数this.web3[' + i + ']', accountsCount);
+        let accountsHas = await this.odysseyGetAccounts(this.web3[i]);
+        console.log('sintan1071 dev --- 本地已存在的账户this.web3[' + i + '] accountsHas.length', accountsHas.length);
 
-            // for(let j = 0; j < accountsHas; j++) {
-            // 因为存在本地账户数目accountsHas.length比accountsCount多的情况
-            for(let j = 0; j < accountsCount && j < accountsHas.length; j++) {
-                const ele = accountsHas[j];
-                if(!this.keyCheck.isUsed(ele)) {
-                    console.log(ele + ' is not used');
-                    let balance = await this.odysseyGetBalance(this.web3[i], ele);
-                    if(balance <= 18000000000000000) await this.odysseyTransfer(this.web3[i], this.ethereumConfig.contractDeployerAddress, ele, 1);
-                    await this.web3[i].eth.personal.unlockAccount(ele, this.ethereumConfig.contractDeployerAddressPassword | '1234', 100000);
-                    accounts.push(ele);
-                }
+        // for(let j = 0; j < accountsHas; j++) {
+        // 因为存在本地账户数目accountsHas.length比accountsCount多的情况
+        for (let j = 0; j < accountsCount && j < accountsHas.length; j++) {
+            const ele = accountsHas[j];
+            if (!this.keyCheck.isUsed(ele)) {
+                console.log(ele + ' is not used');
+                let balance = await this.odysseyGetBalance(this.web3[i], ele);
+                if (balance <= 18000000000000000) await this.odysseyTransfer(this.web3[i], this.ethereumConfig.contractDeployerAddress, ele, 1);
+                await this.web3[i].eth.personal.unlockAccount(ele, this.ethereumConfig.contractDeployerAddressPassword, 100000);
+                accounts.push(ele);
             }
+        }
 
-            console.log('sintan1071 dev --- 现在已经准备好的账户this.web3[' + i + '] accounts', accounts.length);
-            let accountsNeed = accountsCount - accounts.length;
-            console.log('sintan1071 dev --- 需要新建的账户数this.web3[' + i + '] accountsNeed', accountsNeed);
+        console.log('sintan1071 dev --- 现在已经准备好的账户this.web3[' + i + '] accounts', accounts.length);
+        let accountsNeed = accountsCount - accounts.length;
+        console.log('sintan1071 dev --- 需要新建的账户数this.web3[' + i + '] accountsNeed', accountsNeed);
 
-            for(let j = 0; j < accountsNeed; j++) {
-                let newAddress = await this.odysseyCreatAccount(this.web3[i], this.ethereumConfig.contractDeployerAddressPassword | '1234');
-                this.keyCheck.isUsed(newAddress);
-                console.log('sintan1071 dev --- 新建的账户this.web3[' + i + '] newAddress num', j+1, newAddress);
-                await this.odysseyTransfer(this.web3[i], this.ethereumConfig.contractDeployerAddress, newAddress, 1);
-                await this.web3[i].eth.personal.unlockAccount(newAddress, this.ethereumConfig.contractDeployerAddressPassword | '1234', 100000);
-                accounts.push(newAddress);
-            }
-            console.log('sintan1071 dev --- 所有账户 this.web3[' + i + '].fromAddress', accounts);
-            this.web3[i].fromAddresses = accounts;
+        for (let j = 0; j < accountsNeed; j++) {
+            let newAddress = await this.odysseyCreatAccount(this.web3[i], this.ethereumConfig.contractDeployerAddressPassword);
+            this.keyCheck.isUsed(newAddress);
+            console.log('sintan1071 dev --- 新建的账户this.web3[' + i + '] newAddress num', j + 1, newAddress);
+            await this.odysseyTransfer(this.web3[i], this.ethereumConfig.contractDeployerAddress, newAddress, 1);
+            await this.web3[i].eth.personal.unlockAccount(newAddress, this.ethereumConfig.contractDeployerAddressPassword, 100000);
+            accounts.push(newAddress);
+        }
+        console.log('sintan1071 dev --- 所有账户 this.web3[' + i + '].fromAddress', accounts);
+        this.web3[i].fromAddresses = accounts;
         // }
     }
 
@@ -410,7 +411,7 @@ class Odyssey extends BlockchainInterface {
         return web3ClientsAccountsCount;
     }
 
-    odysseyGetAccounts (iweb3) {
+    odysseyGetAccounts(iweb3) {
         // return new Promise(
         //     (resolve) => {
         //         iweb3.eth.getAccounts().then((ret) => {
@@ -420,7 +421,7 @@ class Odyssey extends BlockchainInterface {
         return iweb3.eth.getAccounts();
     };
 
-    odysseyGetBalance (iweb3, address) {
+    odysseyGetBalance(iweb3, address) {
         // return new Promise(
         //     (resolve) => {
         //         iweb3.eth.getBalance(address).then((ret) => {
@@ -430,7 +431,7 @@ class Odyssey extends BlockchainInterface {
         return iweb3.eth.getBalance(address);
     };
 
-    odysseyTransfer(iweb3, from, to, amount){
+    odysseyTransfer(iweb3, from, to, amount) {
         // return new Promise(
         //     (resolve) => {
         //         iweb3.eth.sendTransaction({
@@ -443,10 +444,10 @@ class Odyssey extends BlockchainInterface {
         //     })
         amount = amount * 1000000000000000000;
         return iweb3.eth.sendTransaction({
-                    from: from,
-                    to: to,
-                    value: amount
-                });
+            from: from,
+            to: to,
+            value: amount
+        });
     };
 
     odysseyCreatAccount(iweb3, pwd) {
@@ -459,7 +460,7 @@ class Odyssey extends BlockchainInterface {
         return iweb3.eth.personal.newAccount(pwd);
     };
 
-    odysseyUnlock (iweb3, address, pwd, duration = 1000)  {
+    odysseyUnlock(iweb3, address, pwd, duration = 1000) {
 
         // return new Promise(
         //     (resolve) => {
