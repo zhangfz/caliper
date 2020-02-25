@@ -15,17 +15,17 @@
 'use strict';
 
 const { MessageHandler } = require('@hyperledger/caliper-core');
-const EthereumClient = require('./odyssey');
+const OdysseyClient = require('./odyssey');
 
 /**
- * Handles the init message. Constructs the Ethereum adapter.
+ * Handles the init message. Constructs the Odyssey adapter.
  * @param {object} context The context of the message handler object.
  * @param {object} message The message object.
- * @return {Promise<EthereumClient>} The initialized adapter instance.
+ * @return {Promise<OdysseyClient>} The initialized adapter instance.
  * @async
  */
 async function initHandler(context, message) {
-    return new EthereumClient(context.networkConfigPath, context.workspacePath);
+    return new OdysseyClient(context.networkConfigPath, context.workspacePath);
 }
 
 const handlerContext = new MessageHandler({

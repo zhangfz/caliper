@@ -64,7 +64,6 @@ class Odyssey extends BlockchainInterface {
             web3Clients.push(new Web3(this.ethereumConfig.url))
         }
         // this.web3 = new Web3(this.ethereumConfig.url);
-        // console.log('sintan1071 dev --- web3Clients.length', web3Clients.length);
         this.web3 = web3Clients;
         this.web3.transactionConfirmationBlocks = this.ethereumConfig.transactionConfirmationBlocks;
     }
@@ -123,13 +122,14 @@ class Odyssey extends BlockchainInterface {
         let ctrIdx = 0;
 
         ctrIdx = clientIdx % this.web3.length;
-        console.log('sintan1071 dev --- CHECK 1 No.' + clientIdx + ' this.web3[' + ctrIdx + '].fromAddresses.length', (this.web3[ctrIdx].fromAddresses ? this.web3[ctrIdx].fromAddresses.length : 0), this.web3[ctrIdx].fromAddresses);
+        // console.log('sintan1071 dev --- CHECK 1 client No.' + clientIdx + ' this.web3[' + ctrIdx + '].fromAddresses.length', (this.web3[ctrIdx].fromAddresses ? this.web3[ctrIdx].fromAddresses.length : 0), this.web3[ctrIdx].fromAddresses);
+        console.log('sintan1071 dev --- CHECK 1 client No.' + clientIdx + ' this.web3[' + ctrIdx + '] address key check', this.keyCheck);
 
         if (!this.web3[ctrIdx].fromAddresses) {
-            console.log("getContext-----No." + clientIdx + " client use web3[" + ctrIdx + "] has no fromAddress, and do prepare accounts", clientIdx);
+            console.log("getContext----- client No." + clientIdx + " client use web3[" + ctrIdx + "] has no fromAddress, and do prepare accounts", clientIdx);
             await this.prepareAccounts(ctrIdx);
         }
-        console.log('sintan1071 dev --- CHECK 2 No.' + clientIdx + ' this.web3[' + ctrIdx + '].fromAddresses.length', this.web3[ctrIdx].fromAddresses.length, this.web3[ctrIdx].fromAddresses);
+        console.log('sintan1071 dev --- CHECK 2 client No.' + clientIdx + ' this.web3[' + ctrIdx + '].fromAddresses.length', this.web3[ctrIdx].fromAddresses.length, this.web3[ctrIdx].fromAddresses);
 
         let context = {
             clientIdx: clientIdx,
@@ -167,7 +167,7 @@ class Odyssey extends BlockchainInterface {
         let end = (flag * this.ethereumConfig.accountsPerClient) + this.ethereumConfig.accountsPerClient; // javascript 的数组end不用减一来作为数组下标处理，因为是一个左闭右开的区间
         context.fromAddresses = this.web3[ctrIdx].fromAddresses.slice(start, end);
 
-        console.log("sintan1071 dev --- CHECK 3 No." + clientIdx + " this.web3[" + ctrIdx + "] context.fromAddresses is slice:", context.fromAddresses);
+        console.log("sintan1071 dev --- CHECK 3 client No." + clientIdx + " this.web3[" + ctrIdx + "] context.fromAddresses is slice:", context.fromAddresses);
         return context;
     }
 
@@ -199,9 +199,7 @@ class Odyssey extends BlockchainInterface {
             invocations = invokeData;
         }
         let promises = [];
-        console.log('sintan1071 dev --- CHECK invocations', invocations);
         invocations.forEach((item, index) => {
-            console.log('sintan1071 dev --- CHECK invocations index item', index, item);
             for (let i = 0; i < context.fromAddresses.length; i++) {
                 promises.push(this.sendTransaction(context, contractID, contractVer, item, timeout, context.fromAddresses[i]));
             }
@@ -274,14 +272,15 @@ class Odyssey extends BlockchainInterface {
                 } else if (contractInfo.estimateGas) {
                     params.gas = 1000 + await contractInfo.contract.methods[methodCall.verb].estimateGas(params);
                 }
-                console.log('sintan1071 dev --- methodCall', methodCall);
                 receipt = await contractInfo.contract.methods[methodCall.verb]()[methodType](params);
             }
+            console.log('sintan1071 dev --- send ok', address, methodCall);
             status.SetID(receipt.transactionHash);
             status.SetResult(receipt);
             status.SetVerification(true);
             status.SetStatusSuccess();
         } catch (err) {
+            console.log('sintan1071 dev --- send err', address, methodCall);
             status.SetStatusFail();
             logger.error('Failed tx on ' + contractID + ' calling method ' + methodCall.verb + ' nonce ' + params.nonce);
             logger.error(err);
