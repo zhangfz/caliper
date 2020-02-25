@@ -245,7 +245,7 @@ class Report {
     printResultsByRound() {
         const tableArray = this.convertToTable(this.resultsByRound);
         Logger.info('### All test results ###');
-        console.log('sintan1071 dev --- printResultsByRound', this.resultsByRound, tableArray);
+        // console.log('sintan1071 dev --- printResultsByRound', this.resultsByRound, tableArray);
         this.printTable(tableArray);
 
         this.reportBuilder.setSummaryTable(tableArray);

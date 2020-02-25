@@ -16,7 +16,7 @@
 test:
     clients:
         type: local
-        number: 4
+        number: 6
     rounds:
     - label: open
       txNumber: 200
@@ -32,7 +32,7 @@ test:
       txNumber: 200
       rateControl: { type: 'linear-rate', opts: { startingTps: 5, finishingTps: 20 } }
       arguments:
-          money: 10000
+          money: 1
       callback: transfer.js
 observer:
     interval: 1
