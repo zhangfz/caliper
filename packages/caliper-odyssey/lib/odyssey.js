@@ -69,7 +69,7 @@ class Odyssey extends BlockchainInterface {
         if (this.ethereumConfig.contractDeployerAddressPrivateKey) {
             this.web3[0].eth.accounts.wallet.add(this.ethereumConfig.contractDeployerAddressPrivateKey);
         } else if (this.ethereumConfig.contractDeployerAddressPassword) {
-            return this.web3[0].eth.personal.unlockAccount(this.ethereumConfig.contractDeployerAddress, this.ethereumConfig.contractDeployerAddressPassword, 1000000);
+            await this.web3[0].eth.personal.unlockAccount(this.ethereumConfig.contractDeployerAddress, this.ethereumConfig.contractDeployerAddressPassword, 1000000);
         }
 
         this.keyCheck = {};
