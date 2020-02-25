@@ -1,4 +1,5 @@
 *bak*
+*accounts.json
 
 # Ignore any generated html files, but include the report html template
 *.html

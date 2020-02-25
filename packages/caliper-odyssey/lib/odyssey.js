@@ -19,6 +19,7 @@ const Web3 = require('web3');
 const {BlockchainInterface, CaliperUtils, TxStatus} = require('@hyperledger/caliper-core');
 const logger = CaliperUtils.getLogger('odyssey.js');
 const path = require('path');
+const fs = require("fs");
 
 /**
  * @typedef {Object} EthereumInvoke
@@ -44,16 +45,6 @@ class Odyssey extends BlockchainInterface {
         this.bcType = 'ethereum';
         this.workspaceRoot = workspace_root;
         this.ethereumConfig = require(config_path).ethereum;
-        this.keyCheck = {};
-        this.keyCheck.isUsed = function (key) {
-            // console.log('keyCheck this', this)
-            if (this.hasOwnProperty(key)) {
-                return true;
-            } else {
-                this[key] = true;
-                return false;
-            }
-        };
 
         let web3Clients = [];
         if (typeof (this.ethereumConfig.url) == 'object') {
@@ -72,14 +63,36 @@ class Odyssey extends BlockchainInterface {
      * Initialize the {Odyssey} object.
      * @return {object} Promise<boolean> True if the account got unlocked successful otherwise false.
      */
-    init() {
+    async init() {
         console.log("init-------------------");
 
         if (this.ethereumConfig.contractDeployerAddressPrivateKey) {
             this.web3[0].eth.accounts.wallet.add(this.ethereumConfig.contractDeployerAddressPrivateKey);
         } else if (this.ethereumConfig.contractDeployerAddressPassword) {
-            return this.web3[0].eth.personal.unlockAccount(this.ethereumConfig.contractDeployerAddress, this.ethereumConfig.contractDeployerAddressPassword, 100000);
+            return this.web3[0].eth.personal.unlockAccount(this.ethereumConfig.contractDeployerAddress, this.ethereumConfig.contractDeployerAddressPassword, 1000000);
         }
+
+        this.keyCheck = {};
+        this.keyCheck.isUsed = function (key) {
+            // console.log('keyCheck this', this)
+            if (this.hasOwnProperty(key)) {
+                return true;
+            } else {
+                this[key] = true;
+                return false;
+            }
+        };
+
+        let web3ToAccountsJson = await this.prepareAccounts();
+
+        console.log("sintan 1071 dev --- 写入账户开始");
+        fs.writeFile('accounts.json', JSON.stringify(web3ToAccountsJson),  function(err) {
+            if (err) {
+                return console.error(err);
+            }
+            console.log("sintan 1071 dev --- 账户数据写入成功！");
+        });
+
     }
 
     /**
@@ -123,11 +136,14 @@ class Odyssey extends BlockchainInterface {
 
         ctrIdx = clientIdx % this.web3.length;
         // console.log('sintan1071 dev --- CHECK 1 client No.' + clientIdx + ' this.web3[' + ctrIdx + '].fromAddresses.length', (this.web3[ctrIdx].fromAddresses ? this.web3[ctrIdx].fromAddresses.length : 0), this.web3[ctrIdx].fromAddresses);
-        console.log('sintan1071 dev --- CHECK 1 client No.' + clientIdx + ' this.web3[' + ctrIdx + '] address key check', this.keyCheck);
 
         if (!this.web3[ctrIdx].fromAddresses) {
             console.log("getContext----- client No." + clientIdx + " client use web3[" + ctrIdx + "] has no fromAddress, and do prepare accounts", clientIdx);
-            await this.prepareAccounts(ctrIdx);
+            // await this.prepareAccounts(ctrIdx);
+            let content = fs.readFileSync('accounts.json');
+            console.log("sintan 1071 dev --- 同步读取: " + content.toString());
+            let web3ToAccountsJson = JSON.parse(content.toString());
+            this.web3[ctrIdx].fromAddresses = web3ToAccountsJson[ctrIdx];
         }
         console.log('sintan1071 dev --- CHECK 2 client No.' + clientIdx + ' this.web3[' + ctrIdx + '].fromAddresses.length', this.web3[ctrIdx].fromAddresses.length, this.web3[ctrIdx].fromAddresses);
 
@@ -353,45 +369,49 @@ class Odyssey extends BlockchainInterface {
         return result;
     }
 
-    async prepareAccounts(i) {
+    // async prepareAccounts(i) {
+    async prepareAccounts() {
         console.log("prepareAccounts-------------------");
 
-        // for (let i = 0; i < this.web3.length; i++) {
-        let accounts = [];
+        let web3ToAccounts = {};
+        for (let i = 0; i < this.web3.length; i++) {
+            let accounts = [];
 
-        let accountsCount = this.calcWeb3ClientsAccountsCount(i);
-        console.log('sintan1071 dev --- 需要的总账户数this.web3[' + i + ']', accountsCount);
-        let accountsHas = await this.odysseyGetAccounts(this.web3[i]);
-        console.log('sintan1071 dev --- 本地已存在的账户this.web3[' + i + '] accountsHas.length', accountsHas.length);
+            let accountsCount = this.calcWeb3ClientsAccountsCount(i);
+            console.log('sintan1071 dev --- 需要的总账户数this.web3[' + i + ']', accountsCount);
+            let accountsHas = await this.odysseyGetAccounts(this.web3[i]);
+            console.log('sintan1071 dev --- 本地已存在的账户this.web3[' + i + '] accountsHas.length', accountsHas.length);
 
-        // for(let j = 0; j < accountsHas; j++) {
-        // 因为存在本地账户数目accountsHas.length比accountsCount多的情况
-        for (let j = 0; j < accountsCount && j < accountsHas.length; j++) {
-            const ele = accountsHas[j];
-            if (!this.keyCheck.isUsed(ele)) {
-                console.log(ele + ' is not used');
-                let balance = await this.odysseyGetBalance(this.web3[i], ele);
-                if (balance <= 18000000000000000) await this.odysseyTransfer(this.web3[i], this.ethereumConfig.contractDeployerAddress, ele, 1);
-                await this.web3[i].eth.personal.unlockAccount(ele, this.ethereumConfig.contractDeployerAddressPassword, 100000);
-                accounts.push(ele);
+            // for(let j = 0; j < accountsHas; j++) {
+            // 因为存在本地账户数目accountsHas.length比accountsCount多的情况
+            for (let j = 0; j < accountsCount && j < accountsHas.length; j++) {
+                const ele = accountsHas[j];
+                if (!this.keyCheck.isUsed(ele)) {
+                    console.log(ele + ' is not used');
+                    let balance = await this.odysseyGetBalance(this.web3[i], ele);
+                    if (balance <= 18000000000000000) await this.odysseyTransfer(this.web3[i], this.ethereumConfig.contractDeployerAddress, ele, 1);
+                    await this.web3[i].eth.personal.unlockAccount(ele, this.ethereumConfig.contractDeployerAddressPassword, 1000000);
+                    accounts.push(ele);
+                }
             }
-        }
 
-        console.log('sintan1071 dev --- 现在已经准备好的账户this.web3[' + i + '] accounts', accounts.length);
-        let accountsNeed = accountsCount - accounts.length;
-        console.log('sintan1071 dev --- 需要新建的账户数this.web3[' + i + '] accountsNeed', accountsNeed);
+            console.log('sintan1071 dev --- 现在已经准备好的账户this.web3[' + i + '] accounts', accounts.length);
+            let accountsNeed = accountsCount - accounts.length;
+            console.log('sintan1071 dev --- 需要新建的账户数this.web3[' + i + '] accountsNeed', accountsNeed);
 
-        for (let j = 0; j < accountsNeed; j++) {
-            let newAddress = await this.odysseyCreatAccount(this.web3[i], this.ethereumConfig.contractDeployerAddressPassword);
-            this.keyCheck.isUsed(newAddress);
-            console.log('sintan1071 dev --- 新建的账户this.web3[' + i + '] newAddress num', j + 1, newAddress);
-            await this.odysseyTransfer(this.web3[i], this.ethereumConfig.contractDeployerAddress, newAddress, 1);
-            await this.web3[i].eth.personal.unlockAccount(newAddress, this.ethereumConfig.contractDeployerAddressPassword, 100000);
-            accounts.push(newAddress);
+            for (let j = 0; j < accountsNeed; j++) {
+                let newAddress = await this.odysseyCreatAccount(this.web3[i], this.ethereumConfig.contractDeployerAddressPassword);
+                this.keyCheck.isUsed(newAddress);
+                console.log('sintan1071 dev --- 新建的账户this.web3[' + i + '] newAddress num', j + 1, newAddress);
+                await this.odysseyTransfer(this.web3[i], this.ethereumConfig.contractDeployerAddress, newAddress, 1);
+                await this.web3[i].eth.personal.unlockAccount(newAddress, this.ethereumConfig.contractDeployerAddressPassword, 1000000);
+                accounts.push(newAddress);
+            }
+            console.log('sintan1071 dev --- 所有账户 this.web3[' + i + '].fromAddress', accounts);
+            // this.web3[i].fromAddresses = accounts;
+            web3ToAccounts[i] = accounts;
         }
-        console.log('sintan1071 dev --- 所有账户 this.web3[' + i + '].fromAddress', accounts);
-        this.web3[i].fromAddresses = accounts;
-        // }
+        return web3ToAccounts;
     }
 
     /**

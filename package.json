@@ -22,6 +22,7 @@
     "@hyperledger/caliper-cli": "^0.2.0",
     "color-scheme": "^1.0.1",
     "ethereumjs-wallet": "^0.6.3",
+    "fs": "0.0.1-security",
     "web3": "^1.2.6"
   },
   "devDependencies": {
