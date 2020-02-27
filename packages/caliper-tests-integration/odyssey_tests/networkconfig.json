@@ -13,7 +13,7 @@
                 "path": "./src/simple/simple.json"
             }
         },
-        "clientsNumber": 6,
+        "clientsNumber": 4,
         "accountsPerClient" : 10
     }
 }
