@@ -20,17 +20,17 @@ test:
     rounds:
     - label: open
       txNumber: 40000
-      rateControl: { type: 'fixed-backlog', opts: { unfinished_per_client: 100 } }
+      rateControl: { type: 'fixed-feedback-rate', opts: { "tps" : 500, "unfinished_per_client": 100 } }
       arguments:
           money: 10000
       callback: open.js
     - label: query
       txNumber: 40000
-      rateControl: { type: 'fixed-backlog', opts: { unfinished_per_client: 100 } }
+      rateControl: { type: 'fixed-feedback-rate', opts: { "tps" : 500, "unfinished_per_client": 100 } }
       callback: query.js
     - label: transfer
       txNumber: 40000
-      rateControl: { type: 'fixed-backlog', opts: { unfinished_per_client: 100 } }
+      rateControl: { type: 'fixed-feedback-rate', opts: { "tps" : 500, "unfinished_per_client": 100 } }
       arguments:
           money: 1
       callback: transfer.js
