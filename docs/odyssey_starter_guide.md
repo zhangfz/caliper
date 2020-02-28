@@ -4,12 +4,12 @@ Follow the guide of [Installing locally from source](https://hyperledger.github.
 
 1.To install the basic dependencies of the repository.
 
-`user@ubuntu:~/caliper$ npm i && npm run repoclean -- --yes && npm run bootstrap`
+`user@ubuntu:~/caliper$ npm i && rm -rf ./node_modules/@hyperledger/* && cp -R ./packages/* ./node_modules/@hyperledger/`
 
 2.To run the CI process locally.
 ```shell
 cd caliper
-BENCHMARK=odyssey ./.travis/benchmark-integration-test-direct.sh
+BENCHMARK=odyssey ./.travis/benchmark-integration-test-run.sh
 ```
 
 3.Likely result , part of terminal log
