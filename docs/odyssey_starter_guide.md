@@ -11,7 +11,6 @@ npm i && rm -rf ./node_modules/@hyperledger/* && cp -R ./packages/* ./node_modul
 
 2.To run the CI process locally.
 ```shell
-cd caliper
 BENCHMARK=odyssey ./.travis/benchmark-integration-test-run.sh
 ```
 
